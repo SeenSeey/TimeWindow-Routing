@@ -1,32 +1,35 @@
+<div align="center">
+
 # Планирование маршрутов выездных инженерных бригад
 
 **Помощник диспетчера: распределяет заявки между бригадами, строит маршруты по реальным дорогам, перестраивает план при изменениях в течение дня и объясняет, почему план такой.**
 
 Хакатон «Лидеры цифровой трансформации» 2026 · Кейс «Билайн Бизнес» · Команда «СливЯ»
 
-![Java][java-badge] ![Spring Boot](https://img.shields.io/badge/Spring_Boot-4.1-6DB33F?logo=springboot&logoColor=white) ![Timefold](https://img.shields.io/badge/Timefold_Solver-2.6-6C3EB8) ![GraphHopper](https://img.shields.io/badge/GraphHopper-11.0-2E7D32) ![Vue](https://img.shields.io/badge/Vue-3.5-42B883?logo=vuedotjs&logoColor=white) ![PostgreSQL](https://img.shields.io/badge/PostgreSQL-16-4169E1?logo=postgresql&logoColor=white) ![Redis][redis-badge]
+![Java][java-badge] ![Spring Boot](https://img.shields.io/badge/Spring_Boot-4.1-6DB33F?logo=springboot&logoColor=white) ![Timefold](https://img.shields.io/badge/Timefold_Solver-2.6-6C3EB8) ![GraphHopper](https://img.shields.io/badge/GraphHopper-11.0-2E7D32) ![Vue](https://img.shields.io/badge/Vue-3.5-42B883?logo=vuedotjs&logoColor=white) ![PostgreSQL](https://img.shields.io/badge/PostgreSQL-16-4169E1?logo=postgresql&logoColor=white) ![Redis][redis-badge] [![License](https://img.shields.io/badge/License-Apache_2.0-blue)](LICENSE)
 
 [Локальный запуск](#local-run) · [Как проверить](#demo) · [Соответствие ТЗ](#compliance) · [Алгоритм](#algorithm) · [Данные](#data) · [API](#api) · [Ограничения](#limitations)
 
-{% list tabs %}
+</div>
 
-- Расписание
+![Доска выездов: визиты бригад на таймлайне](docs/images/schedule.png "Доска выездов: кто, куда и во сколько едет, окна ожидания и метрики плана")
 
-  ![Доска выездов: визиты бригад на таймлайне](docs/images/schedule.png "Доска выездов: кто, куда и во сколько едет, окна ожидания и метрики плана")
-
-- Карта
-
-  ![Карта заявок региона](docs/images/map.png "Карта заявок: точки по типу работ, срочные заявки выделены")
-
-- Бригада
-
-  ![Карточка бригады: маршрут на день и назначенные заявки](docs/images/crew.png "Карточка бригады: маршрут на карте с пробегом по участкам, назначенные заявки, снятие со смены")
-
-- Заявка
-
-  ![Карточка заявки: сведения, место и ход выполнения](docs/images/request.png "Карточка заявки: окно визита, требования, точка на карте и история назначений")
-
-{% endlist %}
+<table>
+  <tr>
+    <td width="33%" align="center" valign="top">
+      <img src="docs/images/map.png" alt="Карта заявок региона"><br>
+      <sub><b>Карта</b> — точки по типу работ, срочные заявки выделены</sub>
+    </td>
+    <td width="33%" align="center" valign="top">
+      <img src="docs/images/crew.png" alt="Карточка бригады: маршрут на день и назначенные заявки"><br>
+      <sub><b>Бригада</b> — маршрут с пробегом по участкам, назначенные заявки, снятие со смены</sub>
+    </td>
+    <td width="33%" align="center" valign="top">
+      <img src="docs/images/request.png" alt="Карточка заявки: сведения, место и ход выполнения"><br>
+      <sub><b>Заявка</b> — окно визита, требования, точка на карте и история назначений</sub>
+    </td>
+  </tr>
+</table>
 
 ---
 
@@ -42,7 +45,10 @@
 - **объясняет результат**: для каждой заявки вне плана показана причина, для каждого изменённого визита - что изменилось и из-за какого события;
 - **показывает план**: таймлайн по бригадам, маршруты на карте, метрики, история версий расписания, ручное редактирование с проверкой ограничений.
 
-{% cut "Постановка задачи от организаторов" %}
+<details>
+<summary><b>Постановка задачи от организаторов</b></summary>
+
+<br>
 
 > Создайте понятный прототип, который распределяет заявки между инженерами, строит маршруты, показывает их на карте и умеет перестраивать план при изменениях.
 >
@@ -64,11 +70,13 @@
 
 Ссылка на задачу: [i.moscow/hackaton/lct](https://i.moscow/hackaton/lct/420731fd6e6b4b4c917428b62f125cdd)
 
-{% endcut %}
+</details>
 
 ---
 
-## Локальный запуск {#local-run}
+<a id="local-run"></a>
+
+## Локальный запуск
 
 Система запускается через Docker Compose: так она переносима между машинами, а PostgreSQL, Redis и nginx поднимаются вместе с приложением.
 
@@ -94,17 +102,21 @@ docker compose -f compose.prod.yml up --build -d
 
 ### Возможные проблемы
 
-**Ошибка загрузки `central-fed.osm.pbf` на шаге 2.** Скачайте файл вручную по ссылке https://lctbln.firsts3.ru/central-fed.osm.pbf, положите его в папку `maps/` в корне проекта и повторите команду из шага 2.
+> [!WARNING]
+> **Ошибка загрузки `central-fed.osm.pbf` на шаге 2.** Скачайте файл вручную по ссылке https://lctbln.firsts3.ru/central-fed.osm.pbf, положите его в папку `maps/` в корне проекта и повторите команду из шага 2.
 
-**Ошибка 502 на страницах приложения.** Пересоберите контейнер nginx, после этого запросы будут проходить нормально:
-
-```sh
-docker compose -f compose.prod.yml down nginx && docker compose -f compose.prod.yml up nginx --build -d
-```
+> [!WARNING]
+> **Ошибка 502 на страницах приложения.** Пересоберите контейнер nginx, после этого запросы будут проходить нормально:
+>
+> ```sh
+> docker compose -f compose.prod.yml down nginx && docker compose -f compose.prod.yml up nginx --build -d
+> ```
 
 ---
 
-## Как проверить {#demo}
+<a id="demo"></a>
+
+## Как проверить
 
 <!-- 📝 Ссылка на развёрнутый стенд / видео-демо -->
 
@@ -120,7 +132,9 @@ docker compose -f compose.prod.yml down nginx && docker compose -f compose.prod.
 
 ---
 
-## Соответствие требованиям кейса {#compliance}
+<a id="compliance"></a>
+
+## Соответствие требованиям кейса
 
 | Требование | Как реализовано |
 |---|---|
@@ -139,11 +153,14 @@ docker compose -f compose.prod.yml down nginx && docker compose -f compose.prod.
 
 ## Архитектура
 
-{% cut "Схема развёртывания" %}
+<details>
+<summary><b>Схема развёртывания</b></summary>
+
+<br>
 
 ![Схема развёртывания: nginx, клиент, сервер с Timefold Solver и GraphHopper, PostgreSQL, Redis](docs/images/architecture.png "Схема развёртывания в Docker Compose")
 
-{% endcut %}
+</details>
 
 - **GraphHopper** работает внутри процесса сервера, внешних API маршрутизации и их лимитов нет.
 - **Redis** кэширует матрицу расстояний региона и геометрию маршрутов бригад (TTL 48 ч).
@@ -164,7 +181,9 @@ docker compose -f compose.prod.yml down nginx && docker compose -f compose.prod.
 
 ---
 
-## Алгоритм планирования {#algorithm}
+<a id="algorithm"></a>
+
+## Алгоритм планирования
 
 ### Модель
 
@@ -175,7 +194,9 @@ docker compose -f compose.prod.yml down nginx && docker compose -f compose.prod.
 - **Оценка плана** складывается из штрафов трёх уровней: hard, medium и soft (`HardMediumSoftScore`, правила — ниже).
 - **Время расчёта.** Solver перебирает варианты и улучшает план, пока не пройдёт 30 секунд или пока на протяжении 10 секунд не найдётся ничего лучше. Результатом становится лучший найденный план ([`solverConfig.xml`](server/src/main/resources/solverConfig.xml)).
 
-### Ограничения и критерии {#constraints}
+<a id="constraints"></a>
+
+### Ограничения и критерии
 
 Уровни сравниваются лексикографически: любое нарушение hard хуже любого medium, medium хуже любого soft. Поэтому Solver сначала ищет **допустимый** план, затем ставит в него **как можно больше заявок** и только потом сокращает **число бригад и пробег**.
 
@@ -214,7 +235,9 @@ docker compose -f compose.prod.yml down nginx && docker compose -f compose.prod.
 | Велосипед | 18 км/ч | 6 |
 | Пешком | 5 км/ч | 4 |
 
-### Перепланирование {#replanning}
+<a id="replanning"></a>
+
+### Перепланирование
 
 Все три события обрабатывает [`ScheduleRecalculationService`](server/src/main/java/stb/core/domain/service/ScheduleRecalculationService.java):
 
@@ -226,7 +249,9 @@ docker compose -f compose.prod.yml down nginx && docker compose -f compose.prod.
 
 Срочная заявка вытесняет обычные за счёт штрафа: её отсутствие в плане стоит 1000, обычной — 1–10. При отмене освободившееся время занимают другие заявки. При снятии бригады её незавершённые заявки распределяются между остальными.
 
-### Объяснимость {#explainability}
+<a id="explainability"></a>
+
+### Объяснимость
 
 Объяснения не зависят от того, как устроен алгоритм планирования. Они строятся только по результату расчёта (какая заявка какой бригаде и на какое время назначена) и по данным о заявках, бригадах и событиях. Внутреннее состояние Timefold Solver и его оценка для этого не нужны. Поэтому Solver можно заменить на собственный алгоритм, другую библиотеку или LLM, а объяснения продолжат работать без изменений.
 
@@ -256,7 +281,9 @@ LLM для формирования текстов мы сознательно �
 
 ---
 
-## Данные {#data}
+<a id="data"></a>
+
+## Данные
 
 ### Демо-набор
 
@@ -273,7 +300,10 @@ LLM для формирования текстов мы сознательно �
 
 На каждый регион три файла в `server/src/main/resources/demo/dataset/<регион>/`. Разделитель `;`, UTF-8, время `HH:MM`, координаты WGS-84.
 
-{% cut "requests.csv — заявки" %}
+<details>
+<summary><b>requests.csv — заявки</b></summary>
+
+<br>
 
 | Поле | Описание | Пример |
 |---|---|---|
@@ -286,9 +316,12 @@ LLM для формирования текстов мы сознательно �
 | `job_type` | Тип работ | INSTALLATION |
 | `required_equipment` | Требуемое оборудование, необязательно | ROUTER |
 
-{% endcut %}
+</details>
 
-{% cut "engineers.csv — бригады" %}
+<details>
+<summary><b>engineers.csv — бригады</b></summary>
+
+<br>
 
 | Поле | Описание | Пример |
 |---|---|---|
@@ -300,9 +333,12 @@ LLM для формирования текстов мы сознательно �
 | `vehicle` | Тип транспорта | PEDESTRIAN |
 | `district` | Подрайон, необязательно. Бригада без подрайона задаёт офис региона | — |
 
-{% endcut %}
+</details>
 
-{% cut "events.csv — сценарий событий" %}
+<details>
+<summary><b>events.csv — сценарий событий</b></summary>
+
+<br>
 
 | Поле | Описание |
 |---|---|
@@ -312,7 +348,7 @@ LLM для формирования текстов мы сознательно �
 | `engineer_id` | ID выбывшей бригады |
 | `request_*` | Для срочной заявки — поля новой заявки |
 
-{% endcut %}
+</details>
 
 [`DatasetValidator`](server/src/main/java/stb/core/infrastructure/csv/DatasetValidator.java) перед загрузкой проверяет уникальность ID, корректность окон и смен, число навыков и то, что события ссылаются на существующие заявки и бригады.
 
@@ -327,7 +363,10 @@ LLM для формирования текстов мы сознательно �
 
 Транспорт: `CAR`, `PUBLIC_TRANSPORT`, `BICYCLE`, `PEDESTRIAN`. Оборудование: `ROUTER` (роутер), `SET_TOP_BOX` (ТВ-приставка), `SMART_SPEAKER` (умная колонка).
 
-{% cut "Схема базы данных" %}
+<details>
+<summary><b>Схема базы данных</b></summary>
+
+<br>
 
 На схеме — основные таблицы и их ключевые поля. Справочники `vehicles`, `skills`, `job_types`, `equipment` и `request_statuses` показаны только внешними ключами с пометкой `→`, чтобы не перегружать схему. Навыки бригад и навыки, которые требует тип работ, хранятся в связующих таблицах `engineer_crew_skills` и `job_type_required_skills`.
 
@@ -416,11 +455,13 @@ erDiagram
     }
 ```
 
-{% endcut %}
+</details>
 
 ---
 
-## API {#api}
+<a id="api"></a>
+
+## API
 
 Префикс `/api/v1`. Ответы приходят в конверте `{ "statusCode", "error", "message", "payload" }`. Списки поддерживают `page` (с 1), `limit` (по умолчанию 20) и `sort`.
 
@@ -483,7 +524,9 @@ erDiagram
 
 ---
 
-## Ограничения прототипа {#limitations}
+<a id="limitations"></a>
+
+## Ограничения прототипа
 
 - **Один дорожный граф для всех видов транспорта.** Расстояния считаются по автомобильному профилю GraphHopper, транспорт различается только средней скоростью. Общественный транспорт — 38 км/ч, без расписания и пересадок.
 - **Загруженность дорог** задана фиксированными коэффициентами по времени суток, без данных о пробках.
